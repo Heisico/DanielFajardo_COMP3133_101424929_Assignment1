@@ -1,5 +1,7 @@
 const Employee = require('../models/Employee');
-const User = require('../models/User'); // Import User model
+const User = require('../models/User'); 
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const resolvers = {
     Query: {
@@ -11,7 +13,7 @@ const resolvers = {
                 throw new Error("Failed to fetch employees");
             }
         },
-        users: async () => { // Add users query
+        users: async () => { 
             try {
                 return await User.find();
             } catch (error) {
@@ -21,6 +23,21 @@ const resolvers = {
         }
     },
     Mutation: {
+        login: async (_, { email, password }) => {  // ✅ Added login mutation only
+            try {
+                const user = await User.findOne({ email });
+                if (!user) throw new Error("User not found");
+
+                const isValid = await bcrypt.compare(password, user.password);
+                if (!isValid) throw new Error("Invalid password");
+
+                return jwt.sign({ userId: user.id }, 'your_secret_key', { expiresIn: '1h' });
+            } catch (error) {
+                console.error("Login error:", error.message);
+                throw new Error("Failed to login: " + error.message);
+            }
+        },
+
         addEmployee: async (_, { first_name, last_name, email, gender, designation, salary, date_of_joining, department, employee_photo }) => {
             try {
                 console.log("Adding Employee:", { first_name, last_name, email, gender, designation, salary, date_of_joining, department, employee_photo });
@@ -32,7 +49,7 @@ const resolvers = {
                     gender,
                     designation,
                     salary,
-                    date_of_joining: new Date(date_of_joining), // Ensure proper date conversion
+                    date_of_joining: new Date(date_of_joining),
                     department,
                     employee_photo
                 });
@@ -45,7 +62,7 @@ const resolvers = {
                 throw new Error("Failed to add employee: " + error.message);
             }
         },
-        addUser: async (_, { username, email, password }) => { // Add addUser mutation
+        addUser: async (_, { username, email, password }) => { 
             try {
                 console.log("Adding User:", { username, email });
 

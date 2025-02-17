@@ -17,7 +17,7 @@ const typeDefs = gql`
         updated_at: String!
     }
 
-    type User {  # ✅ Added User type
+    type User {  
         id: ID!
         username: String!
         email: String!
@@ -28,10 +28,13 @@ const typeDefs = gql`
 
     type Query {
         employees: [Employee]
-        users: [User]  # ✅ Added users query
+        users: [User]  
     }
+    
 
     type Mutation {
+        login(email: String!, password: String!): String
+
         addEmployee(
             first_name: String!,
             last_name: String!,
@@ -44,7 +47,7 @@ const typeDefs = gql`
             employee_photo: String
         ): Employee
 
-        addUser(  # ✅ Added addUser mutation
+        addUser(  
             username: String!,
             email: String!,
             password: String!
